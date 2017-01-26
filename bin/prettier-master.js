@@ -176,7 +176,7 @@ function updateGitIfChanged(commitHash) {
         'Prettifying of JS for ' + commitHash,
         '--author="' + getLastCommitAuthor() + '"',
       ]);
-    //exec('git', ['push', 'origin', masterBranch]);
+    exec('git', ['push', 'origin', masterBranch]);
     var outcome = noFilesChanged === 1
       ? '1 file prettified!'
       : noFilesChanged + 'files prettified!';
