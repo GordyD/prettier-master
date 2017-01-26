@@ -59,13 +59,13 @@ function ensureGitUserExists(repoSlug) {
     "config",
     "--global",
     "user.name",
-    process.env.GITHUB_USER_NAME || "facts-tracker"
+    process.env.GITHUB_USER_NAME || "prettier-master"
   ]);
   exec("git", [
     "config",
     "--global",
     "user.email",
-    process.env.GITHUB_USER_EMAIL || "facts-tracker@no-reply.github.com"
+    process.env.GITHUB_USER_EMAIL || "prettier-master@no-reply.github.com"
   ]);
 }
 
@@ -112,7 +112,10 @@ function ensureBranchIsMaster(branch) {
 
 function ensureNotPullRequest() {
   if (
-    !!process.env.TRAVIS_PULL_REQUEST ||
+    (
+      !!process.env.TRAVIS_PULL_REQUEST &&
+      process.env.TRAVIS_PULL_REQUEST !== 'false'
+    ) ||
       !!process.env.CI_PULL_REQUEST ||
       !!process.env.CI_PULL_REQUESTS
   ) {
