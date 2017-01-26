@@ -8,6 +8,7 @@ var execFileSync = require("child_process").execFileSync;
 var prompt = "prettier-master";
 var masterBranch = process.env.MASTER_BRANCH || "master";
 var prettierCommand = process.env.PRETTIER_CMD || "prettier";
+var commitMessagePrefix = process.PRETTIER_COMMIT_PREFIX || prompt;
 var committerName = process.env.GITHUB_USER_NAME || "prettier-master";
 
 var isCI = !!process.env.CI;
@@ -24,6 +25,19 @@ function exec(command, args, hideFunction) {
     options.cwd = cwd;
   }
   return execFileSync(command, args, options).toString();
+}
+
+function ensureLastCommitWasNotPrettier() {
+  var lastCommitterName = exec("git", [ "log", "-1", '--format="%cn"' ]).trim();
+  var lastCommitMessage = exec("git", [ "log", "-1", '--format="%s"' ]).trim();
+
+  if (lastCommiterName === committerName && lastCommitMessage.indexOf(commitMessagePrefix) === 0) {
+    console.error(
+      "The last commit was made by prettier-master. We do not need to run " +
+      "against this commit, exiting..."
+    );
+    process.exit(0);
+  }
 }
 
 function ensureGitUserExists(repoSlug) {
@@ -197,7 +211,7 @@ function updateGitIfChanged(commitHash) {
     exec("git", [
       "commit",
       "-m",
-      "Prettifying of JS for " + commitHash,
+      prompt + ": prettifying of JS for " + commitHash,
       "--author=" + getLastCommitAuthor()
     ]);
     var filesUpdated = getJSFilesChanged(getCommitHash()).join("\n");
@@ -217,6 +231,7 @@ function updateGitIfChanged(commitHash) {
   }
 }
 
+ensureLastCommitWasNotPrettier();
 ensureGitIsClean();
 var branch = getBranch();
 if (isCI) {
