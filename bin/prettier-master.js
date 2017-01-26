@@ -190,7 +190,7 @@ function updateGitIfChanged(commitHash) {
     .split("\n").length;
   if (noFilesChanged > 0) {
     if (isCI) {
-      exec("git", [ "checkout", masterBranch ]);
+        exec("git", [ "checkout", masterBranch ])
     }
     exec("git", [ "add", "--all" ]);
     exec("git", [
@@ -200,7 +200,7 @@ function updateGitIfChanged(commitHash) {
       "--author=" + getLastCommitAuthor()
     ]);
     var filesUpdated = getJSFilesChanged(getCommitHash()).join("\n");
-    console.log(prompt + ": files updated:\n" + filesUpdated);
+    console.error(prompt + ": files updated:\n" + filesUpdated);
     exec("git", [ "push", "origin", masterBranch ]);
     var outcome = noFilesChanged === 1
       ? "1 file prettified!"
