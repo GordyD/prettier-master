@@ -190,7 +190,7 @@ function updateGitIfChanged(commitHash) {
     .split("\n").length;
   if (noFilesChanged > 0) {
     if (isCI) {
-        exec("git", [ "checkout", masterBranch ])
+      exec("git", [ "checkout", masterBranch ]);
     }
     exec("git", [ "add", "--all" ]);
     exec("git", [
