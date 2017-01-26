@@ -71,18 +71,22 @@ function ensureGitUserExists(repoSlug) {
     "user.email",
     process.env.GITHUB_USER_EMAIL || "prettier-master@no-reply.github.com"
   ]);
-  exec("git", [
-    "remote",
-    "rm",
-    "origin",
-  ]);
-  exec("git", [
-    "remote",
-    "add",
-    "origin",
-    "https://" + process.env.GITHUB_USER + ":" + process.env.GITHUB_TOKEN +
-      "@github.com/" + repoSlug,
-  ], true);
+  exec("git", [ "remote", "rm", "origin" ]);
+  exec(
+    "git",
+    [
+      "remote",
+      "add",
+      "origin",
+      "https://" +
+        process.env.GITHUB_USER +
+        ":" +
+        process.env.GITHUB_TOKEN +
+        "@github.com/" +
+        repoSlug
+    ],
+    true
+  );
 }
 
 function ensureGitIsClean() {
@@ -128,10 +132,8 @@ function ensureBranchIsMaster(branch) {
 
 function ensureNotPullRequest() {
   if (
-    (
-      !!process.env.TRAVIS_PULL_REQUEST &&
-      process.env.TRAVIS_PULL_REQUEST !== 'false'
-    ) ||
+    !!process.env.TRAVIS_PULL_REQUEST &&
+      process.env.TRAVIS_PULL_REQUEST !== "false" ||
       !!process.env.CI_PULL_REQUEST ||
       !!process.env.CI_PULL_REQUESTS
   ) {
@@ -174,7 +176,7 @@ function runPrettier(jsFiles) {
           "install globally with `npm install -g prettier`."
       );
     }
-    process.exit(1)
+    process.exit(1);
   }
 }
 
@@ -188,24 +190,24 @@ function updateGitIfChanged(commitHash) {
     .split("\n").length;
   if (noFilesChanged > 0) {
     if (isCI) {
-      exec("git", ["checkout", masterBranch]);
+      exec("git", [ "checkout", masterBranch ]);
     }
     exec("git", [ "add", "--all" ]);
     exec("git", [
       "commit",
       "-m",
       "Prettifying of JS for " + commitHash,
-      '--author=' + getLastCommitAuthor(),
+      "--author=" + getLastCommitAuthor()
     ]);
-    var filesUpdated = getJSFilesChanged(getCommitHash()).join('\n');
-    console.log(prompt + ': files updated:\n' + filesUpdated);
+    var filesUpdated = getJSFilesChanged(getCommitHash()).join("\n");
+    console.log(prompt + ": files updated:\n" + filesUpdated);
     exec("git", [ "push", "origin", masterBranch ]);
     var outcome = noFilesChanged === 1
       ? "1 file prettified!"
       : noFilesChanged + "files prettified!";
     console.error(prompt + ": " + outcome);
   } else {
-    console.error(prompt + ': nothing to update');
+    console.error(prompt + ": nothing to update");
   }
 }
 
