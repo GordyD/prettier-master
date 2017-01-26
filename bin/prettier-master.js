@@ -174,7 +174,7 @@ function runPrettier(jsFiles) {
           "install globally with `npm install -g prettier`."
       );
     }
-    process.exit(1);
+    process.exit(1)
   }
 }
 
@@ -200,7 +200,7 @@ function updateGitIfChanged(commitHash) {
       : noFilesChanged + "files prettified!";
     console.error(prompt + ": " + outcome);
   } else {
-    console.error(prompt + ": nothing to update");
+    console.error(prompt + ': nothing to update');
   }
 }
 
