@@ -37,8 +37,7 @@ Add to your install section:
 
 ```
   install:
-    - npm install -g prettier
-    - npm install -g prettier-master
+    - npm install -g prettier prettier-master
 ```
 
 Then add to your script section:
