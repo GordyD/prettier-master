@@ -8,6 +8,7 @@ var execFileSync = require("child_process").execFileSync;
 var prompt = "prettier-master";
 var masterBranch = process.env.MASTER_BRANCH || "master";
 var prettierCommand = process.env.PRETTIER_CMD || "prettier";
+var committerName = process.env.GITHUB_USER_NAME || "prettier-master";
 
 var isCI = !!process.env.CI;
 var isTravis = !!process.env.TRAVIS;
@@ -63,7 +64,7 @@ function ensureGitUserExists(repoSlug) {
     "config",
     "--global",
     "user.name",
-    process.env.GITHUB_USER_NAME || "prettier-master"
+    committerName,
   ]);
   exec("git", [
     "config",
@@ -201,11 +202,16 @@ function updateGitIfChanged(commitHash) {
     ]);
     var filesUpdated = getJSFilesChanged(getCommitHash()).join("\n");
     console.error(prompt + ": files updated:\n" + filesUpdated);
-    exec("git", [ "push", "origin", masterBranch ]);
-    var outcome = noFilesChanged === 1
-      ? "1 file prettified!"
-      : noFilesChanged + "files prettified!";
-    console.error(prompt + ": " + outcome);
+    try {
+      exec("git", [ "push", "origin", masterBranch ]);
+      var outcome = noFilesChanged === 1
+        ? "1 file prettified!"
+        : noFilesChanged + "files prettified!";
+      console.error(prompt + ": " + outcome);
+    } catch (e) {
+      console.error(prompt + ": unable to push changes to master");
+    }
+
   } else {
     console.error(prompt + ": nothing to update");
   }
@@ -220,6 +226,10 @@ if (isCI) {
   ensureNotPullRequest();
 }
 var commitHash = getCommitHash();
+if (isTravisCI && !!process.env.TRAVIS_COMMIT_RANGE) {
+  commitHash = process.env.TRAVIS_COMMIT_RANGE;
+}
+
 var jsFilesChanged = getJSFilesChanged(commitHash);
 
 if (jsFilesChanged.length === 0) {
