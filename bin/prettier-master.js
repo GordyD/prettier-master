@@ -192,7 +192,7 @@ function updateGitIfChanged(commitHash) {
       "commit",
       "-m",
       "Prettifying of JS for " + commitHash,
-      '--author="' + getLastCommitAuthor() + '"'
+      '--author=' + getLastCommitAuthor(),
     ]);
     exec("git", [ "push", "origin", masterBranch ]);
     var outcome = noFilesChanged === 1
