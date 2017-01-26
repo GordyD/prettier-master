@@ -14,8 +14,10 @@ var isTravis = !!process.env.TRAVIS;
 var isCircle = !!process.env.CIRCLE;
 
 var cwd = null;
-function exec(command, args) {
-  console.error(">", [ command ].concat(args).join(" "));
+function exec(command, args, hideFunction) {
+  if (!hideFunction) {
+    console.log(">", [ command ].concat(args).join(" "));
+  }
   var options = {};
   if (cwd) {
     options.cwd = cwd;
@@ -69,20 +71,18 @@ function ensureGitUserExists(repoSlug) {
     "user.email",
     process.env.GITHUB_USER_EMAIL || "prettier-master@no-reply.github.com"
   ]);
-
   exec("git", [
     "remote",
     "rm",
     "origin",
   ]);
-
   exec("git", [
     "remote",
     "add",
     "origin",
     "https://" + process.env.GITHUB_USER + ":" + process.env.GITHUB_TOKEN +
       "@github.com/" + repoSlug,
-  ]);
+  ], true);
 }
 
 function ensureGitIsClean() {
@@ -187,6 +187,9 @@ function updateGitIfChanged(commitHash) {
     .trim()
     .split("\n").length;
   if (noFilesChanged > 0) {
+    if (isCI) {
+      exec("git", ["checkout", masterBranch]);
+    }
     exec("git", [ "add", "--all" ]);
     exec("git", [
       "commit",
@@ -194,6 +197,8 @@ function updateGitIfChanged(commitHash) {
       "Prettifying of JS for " + commitHash,
       '--author=' + getLastCommitAuthor(),
     ]);
+    var filesUpdated = getJSFilesChanged(getCommitHash()).join('\n');
+    console.log(prompt + ': files updated:\n' + filesUpdated);
     exec("git", [ "push", "origin", masterBranch ]);
     var outcome = noFilesChanged === 1
       ? "1 file prettified!"
