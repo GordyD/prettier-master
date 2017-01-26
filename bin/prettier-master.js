@@ -25,7 +25,7 @@ function exec(command, args) {
 
 function ensureGitUserExists(repoSlug) {
   repoSlug = repoSlug || "[repoSlug]";
-  if (!process.env.GITHUB_USER) {
+  if (!process.env.GITHUB_USER || !process.env.GITHUB_TOKEN) {
     console.error(
       "In order to use " +
         prompt +
@@ -46,8 +46,10 @@ function ensureGitUserExists(repoSlug) {
         repoSlug +
         "/settings\n" +
         ' - Make sure "Build only if .travis.yml is present" is ON\n' +
-        ' - Fill "Name" with "GITHUB_USER" and "Value" with the name of the ' +
-        'account you generated the token with. Press "Add"\n' +
+        ' - Fill "Name" with "GITHUB_USER" and "Value" with the account ' +
+        'you are logged in with. Press "Add"\n' +
+        ' - Fill "Name" with "GITHUB_TOKEN" and "Value" with the key ' +
+        'that was generated. Press "Add"\n' +
         "\n" +
         "Once this is done, commit anything to the repository to restart " +
         "Travis and it should work :)"
@@ -66,6 +68,20 @@ function ensureGitUserExists(repoSlug) {
     "--global",
     "user.email",
     process.env.GITHUB_USER_EMAIL || "prettier-master@no-reply.github.com"
+  ]);
+
+  exec("git", [
+    "remote",
+    "rm",
+    "origin",
+  ]);
+
+  exec("git", [
+    "remote",
+    "add",
+    "origin",
+    "https://" + process.env.GITHUB_USER + ":" + process.env.GITHUB_TOKEN +
+      "@github.com/" + repoSlug,
   ]);
 }
 
