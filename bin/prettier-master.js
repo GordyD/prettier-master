@@ -1,14 +1,5 @@
 #!/usr/bin/env node
 
-/**
- * Copyright (c) 2016-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- */
-
 'use strict';
 
 var fs = require('fs');
@@ -17,6 +8,7 @@ var execFileSync = require('child_process').execFileSync;
 
 var prompt = 'prettier-master';
 var masterBranch = process.env.MASTER_BRANCH || 'master';
+var prettierCommand = process.env.PRETTIER_CMD || 'prettier';
 
 var isCI = !!process.env.CI;
 var isTravis = !!process.env.TRAVIS;
@@ -85,6 +77,23 @@ function ensureGitIsClean() {
   }
 }
 
+function getRepoSlug() {
+  if (isTravis) {
+    return process.env.TRAVIS_REPO_SLUG;
+  }
+
+  var remotes = exec('git', ['remote', '-v']).split('\n');
+  for (var i = 0; i < remotes.length; ++i) {
+    var match = remotes[i].match(/^origin\t[^:]+:([^\.]+).+\(fetch\)/);
+    if (match) {
+      return match[1];
+    }
+  }
+
+  console.error('Cannot find repository slug, sorry.');
+  process.exit(1);
+}
+
 function getBranch() {
   if (isTravis) {
     return process.env.TRAVIS_BRANCH;
@@ -118,8 +127,11 @@ function getCommitHash() {
 }
 
 function getJSFilesChanged(commitHash) {
-  return exec('git', ['diff', '--name-only', commitHash])
-    .trim()
+  var diff = exec(
+    'git',
+    ['diff-tree', '--no-commit-id', '--name-only', '-r', commitHash]
+  );
+  return diff.trim()
     .split(/\s+/g)
     .filter(function(file) {
       return file.substring(file.length - 3) === '.js'
@@ -127,22 +139,48 @@ function getJSFilesChanged(commitHash) {
 }
 
 function runPrettier(jsFiles) {
-  exec('./node_modules/.bin/prettier', ['--write'].concat(jsFiles));
+  try {
+    exec(prettierCommand, ['--write'].concat(jsFiles));
+  } catch(e) {
+    if (prettierCommand === 'prettier') {
+      console.error(
+        'It looks like Prettier is not installed globally. You\'ll need to ' +
+        'run `npm install -g prettier` and make sure it installs successfully'
+      );
+    } else {
+      console.error(
+        'It looks like Prettier is not installed at the path you specified: ' +
+        prettierCommand + '. Please double check this or alternatively ' +
+        'install globally with `npm install -g prettier`.'
+      );
+    }
+    process.exit(1);
+  }
+}
+
+function getLastCommitAuthor() {
+  return exec('git', ['log', '-1', '--format="%an <%ae>"']).trim();
 }
 
 function updateGitIfChanged(commitHash) {
   var noFilesChanged = exec('git', ['status', '--porcelain'])
     .trim()
-    .split(/\s+/g)
+    .split('\n')
     .length;
   if (noFilesChanged > 0) {
     exec('git', ['add', '--all']);
-    exec('git', ['commit', '-m', 'Prettifying of JS for ' + commitHash]);
+    exec(
+      'git', [
+        'commit',
+        '-m',
+        'Prettifying of JS for ' + commitHash,
+        '--author="' + getLastCommitAuthor() + '"',
+      ]);
     //exec('git', ['push', 'origin', masterBranch]);
     var outcome = noFilesChanged === 1
       ? '1 file prettified!'
       : noFilesChanged + 'files prettified!';
-    console.error(prompt + ':' + outcome);
+    console.error(prompt + ': ' + outcome);
   } else {
     console.error(prompt + ': nothing to update');
   }
@@ -151,7 +189,8 @@ function updateGitIfChanged(commitHash) {
 ensureGitIsClean();
 var branch = getBranch();
 if (isCI) {
-  ensureGitUserExists();
+  var repoSlug = getRepoSlug();
+  ensureGitUserExists(repoSlug);
   ensureBranchIsMaster(branch);
   ensureNotPullRequest();
 }
