@@ -2,11 +2,10 @@
   "name": "prettier-master",
   "version": "0.0.1",
   "description": "A bot for formatting any JS files changed in commits to master and then re-commiting them.",
-  "main": "index.js",
   "bin": {
     "prettier-master": "./bin/prettier-master.js"
   },
-  "author": "",
+  "author": "Gordon Dent <gmd@fb.com>",
   "license": "MIT",
   "dependencies": {
     "prettier": "^0.11.0"

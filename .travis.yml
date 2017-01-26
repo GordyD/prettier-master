@@ -1,0 +1,11 @@
+language: node_js
+node_js:
+  - "4"
+env:
+  - MASTER_BRANCH=master
+  - PRETTIER_CMD=prettier
+install:
+  - npm install -g prettier
+  - npm install -g prettier-master
+script:
+  - prettier-master
