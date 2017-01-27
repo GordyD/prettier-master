@@ -31,10 +31,13 @@ function ensureLastCommitWasNotPrettier() {
   var lastCommitterName = exec("git", [ "log", "-1", '--format="%cn"' ]).trim();
   var lastCommitMessage = exec("git", [ "log", "-1", '--format="%s"' ]).trim();
 
-  if (lastCommitterName === committerName && lastCommitMessage.indexOf(commitMessagePrefix) === 0) {
+  if (
+    lastCommitterName === committerName &&
+      lastCommitMessage.indexOf(commitMessagePrefix) === 0
+  ) {
     console.error(
       "The last commit was made by prettier-master. We do not need to run " +
-      "against this commit, exiting..."
+        "against this commit, exiting..."
     );
     process.exit(0);
   }
@@ -74,12 +77,7 @@ function ensureGitUserExists(repoSlug) {
     process.exit(1);
   }
 
-  exec("git", [
-    "config",
-    "--global",
-    "user.name",
-    committerName,
-  ]);
+  exec("git", [ "config", "--global", "user.name", committerName ]);
   exec("git", [
     "config",
     "--global",
@@ -223,7 +221,6 @@ function updateGitIfChanged(commitHash) {
     } catch (e) {
       console.error(prompt + ": unable to push changes to master");
     }
-
   } else {
     console.error(prompt + ": nothing to update");
   }
