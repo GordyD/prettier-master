@@ -31,7 +31,7 @@ function ensureLastCommitWasNotPrettier() {
   var lastCommitterName = exec("git", [ "log", "-1", '--format="%cn"' ]).trim();
   var lastCommitMessage = exec("git", [ "log", "-1", '--format="%s"' ]).trim();
 
-  if (lastCommiterName === committerName && lastCommitMessage.indexOf(commitMessagePrefix) === 0) {
+  if (lastCommitterName === committerName && lastCommitMessage.indexOf(commitMessagePrefix) === 0) {
     console.error(
       "The last commit was made by prettier-master. We do not need to run " +
       "against this commit, exiting..."
@@ -200,10 +200,9 @@ function getLastCommitAuthor() {
 }
 
 function updateGitIfChanged(commitHash) {
-  var noFilesChanged = exec("git", [ "status", "--porcelain" ])
-    .trim()
-    .split("\n").length;
-  if (noFilesChanged > 0) {
+  var status = exec("git", [ "status", "--porcelain" ]).trim();
+  if (status.length > 0) {
+    console.log(exec("git", [ "status", "--porcelain" ]));
     if (isCI) {
       exec("git", [ "checkout", masterBranch ]);
     }
@@ -211,7 +210,7 @@ function updateGitIfChanged(commitHash) {
     exec("git", [
       "commit",
       "-m",
-      prompt + ": prettifying of JS for " + commitHash,
+      "'" + prompt + ": prettifying of JS for " + commitHash + "'",
       "--author=" + getLastCommitAuthor()
     ]);
     var filesUpdated = getJSFilesChanged(getCommitHash()).join("\n");
@@ -241,7 +240,7 @@ if (isCI) {
   ensureNotPullRequest();
 }
 var commitHash = getCommitHash();
-if (isTravisCI && !!process.env.TRAVIS_COMMIT_RANGE) {
+if (isTravis && !!process.env.TRAVIS_COMMIT_RANGE) {
   commitHash = process.env.TRAVIS_COMMIT_RANGE;
 }
 
