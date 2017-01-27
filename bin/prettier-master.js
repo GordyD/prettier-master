@@ -202,7 +202,6 @@ function getLastCommitAuthor() {
 function updateGitIfChanged(commitHash) {
   var status = exec("git", [ "status", "--porcelain" ]).trim();
   if (status.length > 0) {
-    console.log(exec("git", [ "status", "--porcelain" ]));
     if (isCI) {
       exec("git", [ "checkout", masterBranch ]);
     }
@@ -241,13 +240,16 @@ if (isCI) {
 }
 var commitHash = getCommitHash();
 if (isTravis && !!process.env.TRAVIS_COMMIT_RANGE) {
-  commitHash = process.env.TRAVIS_COMMIT_RANGE;
+  // Travis commit ranges are triple dots when they should be doubles
+  // this protects from this
+  // see: https://git-scm.com/book/en/v2/Git-Tools-Revision-Selection#double_dot
+  commitHash = process.env.TRAVIS_COMMIT_RANGE.replace('...', '..');
 }
 
 var jsFilesChanged = getJSFilesChanged(commitHash);
 
 if (jsFilesChanged.length === 0) {
-  console.error(prompt + ": nothing to update");
+  console.error(prompt + ": no JavaScript files changed in push");
   process.exit(0);
 }
 
