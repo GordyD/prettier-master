@@ -1,6 +1,6 @@
 # prettier-master
 
-A bot that runs Prettier on all JavaScript code that has been changed. This
+A bot that runs [Prettier](https://github.com/jlongster/prettier) on all JavaScript code that has been changed. This
 will inspect the previous commit and run prettier against any updated JavaScript
 files. It will then commit the changes to master.
 
