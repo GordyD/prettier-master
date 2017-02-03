@@ -1,6 +1,8 @@
 # prettier-master
 
-A bot that runs Prettier on all JavaScript code that has been changed. This
+[![Build Status](https://travis-ci.org/GordyD/prettier-master.svg?branch=master)](https://travis-ci.org/GordyD/prettier-master)
+
+A bot that runs [Prettier](https://github.com/jlongster/prettier) on all JavaScript code that has been changed. This
 will inspect the previous commit and run prettier against any updated JavaScript
 files. It will then commit the changes to master.
 

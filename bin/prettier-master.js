@@ -251,7 +251,7 @@ if (isTravis && !!process.env.TRAVIS_COMMIT_RANGE) {
   // Travis commit ranges are triple dots when they should be doubles
   // this protects from this
   // see: https://git-scm.com/book/en/v2/Git-Tools-Revision-Selection#double_dot
-  commitHash = process.env.TRAVIS_COMMIT_RANGE.replace('...', '..');
+  commitHash = process.env.TRAVIS_COMMIT_RANGE.replace("...", "..");
 }
 
 var jsFilesChanged = getJSFilesChanged(commitHash);
