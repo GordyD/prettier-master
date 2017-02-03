@@ -10,6 +10,7 @@ var masterBranch = process.env.MASTER_BRANCH || "master";
 var prettierCommand = process.env.PRETTIER_CMD || "prettier";
 var commitMessagePrefix = process.PRETTIER_COMMIT_PREFIX || prompt;
 var committerName = process.env.GITHUB_USER_NAME || "prettier-master";
+var pullRequestOnChange = process.env.PR_ON_CHANGE === 'true';
 
 var isCI = !!process.env.CI;
 var isTravis = !!process.env.TRAVIS;
@@ -203,6 +204,12 @@ function updateGitIfChanged(commitHash) {
     if (isCI) {
       exec("git", [ "checkout", masterBranch ]);
     }
+    var branch = pullRequestOnChange
+      ? prompt + '-' + commitHash
+      : masterBranch;
+    if (pullRequestOnChange) {
+      exec("git", ["branch", branch]);
+    }
     exec("git", [ "add", "--all" ]);
     exec("git", [
       "commit",
@@ -213,7 +220,11 @@ function updateGitIfChanged(commitHash) {
     var filesUpdated = getJSFilesChanged(getCommitHash()).join("\n");
     console.error(prompt + ": files updated:\n" + filesUpdated);
     try {
-      exec("git", [ "push", "origin", masterBranch ]);
+      exec("git", [ "push", "origin", branch ]);
+      if (pullRequestOnChange) {
+        exec("hub", ["pull-request", "-b", masterBranch, '-h', branch]);
+        console.log(prompt + ": PR opened");
+      }
       var outcome = noFilesChanged === 1
         ? "1 file prettified!"
         : noFilesChanged + "files prettified!";

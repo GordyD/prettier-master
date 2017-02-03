@@ -36,6 +36,10 @@ can add it as part of CI process using either Travis or Circle.
 Add to your install section:
 
 ```
+  before_install:
+    - sudo add-apt-repository ppa:cpick/hub
+    - sudo apt-get update
+    - sudo apt-get install hub
   install:
     - npm install -g prettier prettier-master
 ```

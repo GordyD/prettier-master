@@ -3,8 +3,12 @@ node_js:
   - "4"
 env:
   - MASTER_BRANCH=master
+  - PR_ON_CHANGE=true
+before_install:
+  - sudo add-apt-repository ppa:cpick/hub
+  - sudo apt-get update
+  - sudo apt-get install hub
 install:
-  - npm install -g prettier
-  - npm install -g prettier-master
+  - npm install -g prettier prettier-master
 script:
   - prettier-master
