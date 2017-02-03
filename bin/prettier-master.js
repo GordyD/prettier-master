@@ -240,10 +240,9 @@ function updateGitIfChanged(commitHash) {
         console.log(prompt + ": PR opened");
       }
       var outcome = noFilesChanged === 1
-        ? '1 file prettified!'
-        : noFilesChanged + 
-        "files prettified!";
-      console.error(prompt + ": "  + outcome );
+        ? "1 file prettified!"
+        : noFilesChanged + "files prettified!";
+      console.error(prompt + ": " + outcome);
     } catch (e) {
       console.error(prompt + ": unable to push changes to master");
     }
