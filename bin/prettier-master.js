@@ -14,10 +14,9 @@ var pullRequestOnChange = process.env.PR_ON_CHANGE === "true";
 
 var isCI = !!process.env.CI;
 var isTravis = !!process.env.TRAVIS;
-var isCircle =
-  !!process.env.CIRCLE;
+var isCircle = !!process.env.CIRCLE;
 
-var cwd =  null;
+var cwd = null;
 function exec(command, args, hideFunction) {
   if (!hideFunction) {
     console.log(">", [command].concat(args).join(" "));
