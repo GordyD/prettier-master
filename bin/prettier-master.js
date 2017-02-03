@@ -222,7 +222,21 @@ function updateGitIfChanged(commitHash) {
     try {
       exec("git", [ "push", "origin", branch ]);
       if (pullRequestOnChange) {
-        exec("hub", ["pull-request", "-b", masterBranch, '-h', branch]);
+        exec("curl", [
+          "--user",
+          process.env.GITHUB_USER + ':' + process.env.GITHUB_TOKEN,
+          '--request',
+          'POST',
+          '--data',
+          JSON.stringify({
+            title: prompt + ' - ' + commitHash,
+            body: 'Your friendly Travis CI caught this slip in JS formatting' +
+              'and opened this PR with the required changes for you.',
+            head: branch,
+            base: masterBranch,
+          }),
+          'https://api.github.com/' + repoSlug,
+        ])
         console.log(prompt + ": PR opened");
       }
       var outcome = noFilesChanged === 1
