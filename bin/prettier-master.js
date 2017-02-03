@@ -204,7 +204,9 @@ function updateGitIfChanged(commitHash) {
     if (isCI) {
       exec("git", ["checkout", masterBranch]);
     }
-    var branch = pullRequestOnChange ? prompt + "-" + commitHash : masterBranch;
+    var branch = pullRequestOnChange
+      ? prompt + "-" + getCommitHash()
+      : masterBranch;
     if (pullRequestOnChange) {
       exec("git", ["branch", branch]);
     }
@@ -241,10 +243,11 @@ function updateGitIfChanged(commitHash) {
       }
       var outcome = noFilesChanged === 1
         ? '1 file prettified!'
-        : noFilesChanged + 
+        : noFilesChanged +
         "files prettified!";
       console.error(prompt + ": "  + outcome );
     } catch (e) {
+      console.error(e.message);
       console.error(prompt + ": unable to push changes to master");
     }
   } else {
