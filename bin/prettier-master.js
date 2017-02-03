@@ -229,7 +229,7 @@ function updateGitIfChanged(commitHash) {
           'POST',
           '--data',
           JSON.stringify({
-            title: prompt + ' - ' + commitHash,
+            title: prompt + " - " + commitHash,
             body: 'Your friendly Travis CI caught this slip in JS formatting' +
               'and opened this PR with the required changes for you.',
             head: branch,

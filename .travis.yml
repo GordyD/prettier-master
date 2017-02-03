@@ -3,6 +3,7 @@ node_js:
   - "4"
 env:
   - MASTER_BRANCH=master
+  - PR_ON_CHANGE=true
 install:
   - npm install -g prettier prettier-master
 script:
