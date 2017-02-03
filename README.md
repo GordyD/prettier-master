@@ -24,6 +24,9 @@ executable.
 
  - PRETTIER_CMD - default: 'prettier'
  - MASTER_BRANCH - default: 'master'
+ - PR_ON_CHANGE - default: 'false' - if set to true, then when changes are made
+ a PR will be opened instead of committing straight into the branch. This is the
+ best setting to use.
 
 ## Usage
 
@@ -38,10 +41,8 @@ can add it as part of CI process using either Travis or Circle.
 Add to your install section:
 
 ```
-  before_install:
-    - sudo add-apt-repository ppa:cpick/hub
-    - sudo apt-get update
-    - sudo apt-get install hub
+  env:
+    - PR_ON_CHANGE=true
   install:
     - npm install -g prettier prettier-master
 ```
@@ -54,3 +55,7 @@ Then add to your script section:
 ```
 
 Push some JavaScript changes to your repo!
+
+### Circle
+
+*Documentation coming soon!*

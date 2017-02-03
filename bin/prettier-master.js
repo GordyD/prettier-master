@@ -17,6 +17,11 @@ var isTravis = !!process.env.TRAVIS;
 var isCircle = !!process.env.CIRCLE;
 
 var cwd = null;
+
+/**
+ * Functions
+ */
+
 function exec(command, args, hideFunction) {
   if (!hideFunction) {
     console.log(">", [command].concat(args).join(" "));
@@ -36,7 +41,7 @@ function ensureLastCommitWasNotPrettier() {
     lastCommitterName === committerName &&
       lastCommitMessage.indexOf(commitMessagePrefix) === 0
   ) {
-    console.error(
+    console.log(
       "The last commit was made by prettier-master. We do not need to run " +
         "against this commit, exiting..."
     );
@@ -47,7 +52,7 @@ function ensureLastCommitWasNotPrettier() {
 function ensureGitUserExists(repoSlug) {
   repoSlug = repoSlug || "[repoSlug]";
   if (!process.env.GITHUB_USER || !process.env.GITHUB_TOKEN) {
-    console.error(
+    console.log(
       "In order to use " +
         prompt +
         ", you need to configure a " +
@@ -105,7 +110,7 @@ function ensureGitUserExists(repoSlug) {
 
 function ensureGitIsClean() {
   if (exec("git", ["status", "--porcelain"])) {
-    console.error(prompt + ": `git status` is not clean, aborting.");
+    console.log(prompt + ": `git status` is not clean, aborting.");
     process.exit(1);
   }
 }
@@ -123,7 +128,7 @@ function getRepoSlug() {
     }
   }
 
-  console.error("Cannot find repository slug, sorry.");
+  console.log("Cannot find repository slug, sorry.");
   process.exit(1);
 }
 
@@ -151,7 +156,7 @@ function ensureNotPullRequest() {
       !!process.env.CI_PULL_REQUEST ||
       !!process.env.CI_PULL_REQUESTS
   ) {
-    console.error(prompt + ": This is a PR, exiting...");
+    console.log(prompt + ": This is a PR, exiting...");
     process.exit(0);
   }
 }
@@ -178,12 +183,12 @@ function runPrettier(jsFiles) {
     exec(prettierCommand, ["--write"].concat(jsFiles));
   } catch (e) {
     if (prettierCommand === "prettier") {
-      console.error(
+      console.log(
         "It looks like Prettier is not installed globally. You'll need to " +
           "run `npm install -g prettier` and make sure it installs successfully"
       );
     } else {
-      console.error(
+      console.log(
         "It looks like Prettier is not installed at the path you specified: " +
           prettierCommand +
           ". Please double check this or alternatively " +
@@ -218,7 +223,7 @@ function updateGitIfChanged(commitHash) {
       "--author=" + getLastCommitAuthor()
     ]);
     var filesUpdated = getJSFilesChanged(getCommitHash()).join("\n");
-    console.error(prompt + ": files updated:\n" + filesUpdated);
+    console.log(prompt + ": files updated:\n" + filesUpdated);
     try {
       exec("git", ["push", "origin", branch]);
       if (pullRequestOnChange) {
@@ -231,7 +236,7 @@ function updateGitIfChanged(commitHash) {
           JSON.stringify({
             title: prompt + " - " + commitHash,
             body: (
-              "Your friendly Travis CI caught this slip in JS formatting" +
+              "Your friendly CI Server caught this slip in JS formatting " +
                 "and opened this PR with the required changes for you."
             ),
             head: branch,
@@ -241,24 +246,27 @@ function updateGitIfChanged(commitHash) {
         ]);
         console.log(
           prompt +
-            ": PR opened - " +
+            ": Pull request opened - " +
             "https://api.github.com/repos/" +
             repoSlug +
             "/pulls"
         );
       }
-      var outcome = filesUpdated.length === 1
+      var outcome = status.length === 1
         ? "1 file prettified!"
-        : filesUpdated.length + "files prettified!";
-      console.error(prompt + ": " + outcome);
+        : status.length + " files prettified!";
+      console.log(prompt + ": " + outcome);
     } catch (e) {
-      console.error(e.message);
-      console.error(prompt + ": unable to push changes to master");
+      console.log(prompt + ": unable to push changes to master");
     }
   } else {
-    console.error(prompt + ": nothing to update");
+    console.log(prompt + ": nothing to update");
   }
 }
+
+/**
+ * The script
+ */
 
 ensureLastCommitWasNotPrettier();
 ensureGitIsClean();
@@ -280,7 +288,7 @@ if (isTravis && !!process.env.TRAVIS_COMMIT_RANGE) {
 var jsFilesChanged = getJSFilesChanged(commitHash);
 
 if (jsFilesChanged.length === 0) {
-  console.error(prompt + ": no JavaScript files changed in push");
+  console.log(prompt + ": no JavaScript files changed in push");
   process.exit(0);
 }
 
