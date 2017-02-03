@@ -1,6 +1,6 @@
 {
   "name": "prettier-master",
-  "version": "0.0.14",
+  "version": "0.0.17",
   "description": "A bot for formatting any JS files changed in commits to master and then re-commiting them.",
   "bin": {
     "prettier-master": "./bin/prettier-master.js"

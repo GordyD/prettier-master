@@ -208,7 +208,7 @@ function updateGitIfChanged(commitHash) {
       ? prompt + "-" + getCommitHash()
       : masterBranch;
     if (pullRequestOnChange) {
-      exec("git", ["branch", branch]);
+      exec("git", ["checkout", '-b', branch]);
     }
     exec("git", ["add", "--all"]);
     exec("git", [
@@ -237,9 +237,9 @@ function updateGitIfChanged(commitHash) {
             head: branch,
             base: masterBranch
           }),
-          "https://api.github.com/" + repoSlug,
+          "https://api.github.com/repos/" + repoSlug + '/pulls',
         ]);
-        console.log(prompt + ": PR opened");
+        console.log(prompt + ": PR opened - " + "https://api.github.com/repos/" + repoSlug + '/pulls');
       }
       var outcome = filesUpdated.length === 1
         ? "1 file prettified!"
