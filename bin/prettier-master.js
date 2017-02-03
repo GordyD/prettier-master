@@ -226,7 +226,7 @@ function updateGitIfChanged(commitHash) {
           "--user",
           process.env.GITHUB_USER + ":" + process.env.GITHUB_TOKEN,
           "--request",
-          "POST",
+          'POST' ,
           "--data",
           JSON.stringify({
             title: prompt + " - " + commitHash,
@@ -237,13 +237,13 @@ function updateGitIfChanged(commitHash) {
             head: branch,
             base: masterBranch
           }),
-          "https://api.github.com/" + repoSlug
+          "https://api.github.com/" + repoSlug,
         ]);
         console.log(prompt + ": PR opened");
       }
-      var outcome = noFilesChanged === 1
+      var outcome = filesUpdated.length === 1
         ? "1 file prettified!"
-        : noFilesChanged + "files prettified!";
+        : filesUpdated.length + "files prettified!";
       console.error(prompt + ": " + outcome);
     } catch (e) {
       console.error(e.message);
