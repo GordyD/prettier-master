@@ -10,7 +10,7 @@ var masterBranch = process.env.MASTER_BRANCH || "master";
 var prettierCommand = process.env.PRETTIER_CMD || "prettier";
 var commitMessagePrefix = process.PRETTIER_COMMIT_PREFIX || prompt;
 var committerName = process.env.GITHUB_USER_NAME || "prettier-master";
-var pullRequestOnChange = process.env.PR_ON_CHANGE === 'true';
+var pullRequestOnChange = process.env.PR_ON_CHANGE === "true";
 
 var isCI = !!process.env.CI;
 var isTravis = !!process.env.TRAVIS;
@@ -19,7 +19,7 @@ var isCircle = !!process.env.CIRCLE;
 var cwd = null;
 function exec(command, args, hideFunction) {
   if (!hideFunction) {
-    console.log(">", [ command ].concat(args).join(" "));
+    console.log(">", [command].concat(args).join(" "));
   }
   var options = {};
   if (cwd) {
@@ -29,8 +29,8 @@ function exec(command, args, hideFunction) {
 }
 
 function ensureLastCommitWasNotPrettier() {
-  var lastCommitterName = exec("git", [ "log", "-1", '--format="%cn"' ]).trim();
-  var lastCommitMessage = exec("git", [ "log", "-1", '--format="%s"' ]).trim();
+  var lastCommitterName = exec("git", ["log", "-1", '--format="%cn"']).trim();
+  var lastCommitMessage = exec("git", ["log", "-1", '--format="%s"']).trim();
 
   if (
     lastCommitterName === committerName &&
@@ -78,14 +78,14 @@ function ensureGitUserExists(repoSlug) {
     process.exit(1);
   }
 
-  exec("git", [ "config", "--global", "user.name", committerName ]);
+  exec("git", ["config", "--global", "user.name", committerName]);
   exec("git", [
     "config",
     "--global",
     "user.email",
     process.env.GITHUB_USER_EMAIL || "prettier-master@no-reply.github.com"
   ]);
-  exec("git", [ "remote", "rm", "origin" ]);
+  exec("git", ["remote", "rm", "origin"]);
   exec(
     "git",
     [
@@ -104,7 +104,7 @@ function ensureGitUserExists(repoSlug) {
 }
 
 function ensureGitIsClean() {
-  if (exec("git", [ "status", "--porcelain" ])) {
+  if (exec("git", ["status", "--porcelain"])) {
     console.error(prompt + ": `git status` is not clean, aborting.");
     process.exit(1);
   }
@@ -115,7 +115,7 @@ function getRepoSlug() {
     return process.env.TRAVIS_REPO_SLUG;
   }
 
-  var remotes = exec("git", [ "remote", "-v" ]).split("\n");
+  var remotes = exec("git", ["remote", "-v"]).split("\n");
   for (var i = 0; i < remotes.length; ++i) {
     var match = remotes[i].match(/^origin\t[^:]+:([^\.]+).+\(fetch\)/);
     if (match) {
@@ -133,7 +133,7 @@ function getBranch() {
   } else if (isCircle) {
     return process.env.CIRCLE_BRANCH;
   } else {
-    return exec("git", [ "rev-parse", "--abbrev-ref", "HEAD" ]);
+    return exec("git", ["rev-parse", "--abbrev-ref", "HEAD"]);
   }
 }
 
@@ -157,7 +157,7 @@ function ensureNotPullRequest() {
 }
 
 function getCommitHash() {
-  return exec("git", [ "rev-parse", "HEAD" ]).trim();
+  return exec("git", ["rev-parse", "HEAD"]).trim();
 }
 
 function getJSFilesChanged(commitHash) {
@@ -175,7 +175,7 @@ function getJSFilesChanged(commitHash) {
 
 function runPrettier(jsFiles) {
   try {
-    exec(prettierCommand, [ "--write" ].concat(jsFiles));
+    exec(prettierCommand, ["--write"].concat(jsFiles));
   } catch (e) {
     if (prettierCommand === "prettier") {
       console.error(
@@ -195,22 +195,20 @@ function runPrettier(jsFiles) {
 }
 
 function getLastCommitAuthor() {
-  return exec("git", [ "log", "-1", '--format="%an <%ae>"' ]).trim();
+  return exec("git", ["log", "-1", '--format="%an <%ae>"']).trim();
 }
 
 function updateGitIfChanged(commitHash) {
-  var status = exec("git", [ "status", "--porcelain" ]).trim();
+  var status = exec("git", ["status", "--porcelain"]).trim();
   if (status.length > 0) {
     if (isCI) {
-      exec("git", [ "checkout", masterBranch ]);
+      exec("git", ["checkout", masterBranch]);
     }
-    var branch = pullRequestOnChange
-      ? prompt + '-' + commitHash
-      : masterBranch;
+    var branch = pullRequestOnChange ? prompt + "-" + commitHash : masterBranch;
     if (pullRequestOnChange) {
       exec("git", ["branch", branch]);
     }
-    exec("git", [ "add", "--all" ]);
+    exec("git", ["add", "--all"]);
     exec("git", [
       "commit",
       "-m",
@@ -220,29 +218,32 @@ function updateGitIfChanged(commitHash) {
     var filesUpdated = getJSFilesChanged(getCommitHash()).join("\n");
     console.error(prompt + ": files updated:\n" + filesUpdated);
     try {
-      exec("git", [ "push", "origin", branch ]);
+      exec("git", ["push", "origin", branch]);
       if (pullRequestOnChange) {
         exec("curl", [
           "--user",
-          process.env.GITHUB_USER + ':' + process.env.GITHUB_TOKEN,
-          '--request',
-          'POST',
-          '--data',
+          process.env.GITHUB_USER + ":" + process.env.GITHUB_TOKEN,
+          "--request",
+          "POST",
+          "--data",
           JSON.stringify({
             title: prompt + " - " + commitHash,
-            body: 'Your friendly Travis CI caught this slip in JS formatting' +
-              'and opened this PR with the required changes for you.',
+            body: (
+              "Your friendly Travis CI caught this slip in JS formatting" +
+                "and opened this PR with the required changes for you."
+            ),
             head: branch,
-            base: masterBranch,
+            base: masterBranch
           }),
-          'https://api.github.com/' + repoSlug,
-        ])
+          "https://api.github.com/" + repoSlug
+        ]);
         console.log(prompt + ": PR opened");
       }
       var outcome = noFilesChanged === 1
-        ? "1 file prettified!"
-        : noFilesChanged + "files prettified!";
-      console.error(prompt + ": " + outcome);
+        ? '1 file prettified!'
+        : noFilesChanged + 
+        "files prettified!";
+      console.error(prompt + ": "  + outcome );
     } catch (e) {
       console.error(prompt + ": unable to push changes to master");
     }
