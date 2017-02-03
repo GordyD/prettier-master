@@ -14,9 +14,10 @@ var pullRequestOnChange = process.env.PR_ON_CHANGE === "true";
 
 var isCI = !!process.env.CI;
 var isTravis = !!process.env.TRAVIS;
-var isCircle = !!process.env.CIRCLE;
+var isCircle =
+  !!process.env.CIRCLE;
 
-var cwd = null;
+var cwd =  null;
 function exec(command, args, hideFunction) {
   if (!hideFunction) {
     console.log(">", [command].concat(args).join(" "));
@@ -242,10 +243,9 @@ function updateGitIfChanged(commitHash) {
         console.log(prompt + ": PR opened");
       }
       var outcome = noFilesChanged === 1
-        ? '1 file prettified!'
-        : noFilesChanged +
-        "files prettified!";
-      console.error(prompt + ": "  + outcome );
+        ? "1 file prettified!"
+        : noFilesChanged + "files prettified!";
+      console.error(prompt + ": " + outcome);
     } catch (e) {
       console.error(e.message);
       console.error(prompt + ": unable to push changes to master");
